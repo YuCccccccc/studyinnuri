@@ -1,0 +1,92 @@
+PasswordEncode
+
+스프링 시큐리티(Spring Security)에서 제공하는 비밀번호 암호화 방법이다. 
+단방향 암호화로 진행이 되는데 인터페이스와 구현체를 제공
+
+해시함수란
+임의의 길이를 갖는 임의의 데이터에 대해 고정된 길이의 데이터로 매핑하는 함수를 말한다. 
+Hash Table 자료구조에 사용되며, 빠른 데이터 검색을 할 수 있다.
+암호학에서는 이러한 해시 함수의 특징에 원래 입력값과 관계를 찾기 힘들다는 성질 즉 입력값을 알 수 없다는 성질을 추가한 단반향성 암호화 해시 함수를 사용한다.
+
+Spring Security 5.3.3에서 공식 지원하는 PasswordEncoder 구현 클래스
+BcryptPasswordEncoder : BCrypt 해시 함수를 사용해 비밀번호를 암호화
+Argon2PasswordEncoder : Argon2 해시 함수를 사용해 비밀번호를 암호화
+Pbkdf2PasswordEncoder : PBKDF2 해시 함수를 사용해 비밀번호를 암호화
+SCryptPasswordEncoder : SCrypt 해시 함수를 사용해 비밀번호를 암호화
+
+
+
+    public interface PasswordEncoder {
+
+        // 비밀번호를 단방향 암호화
+        String encode(CharSequence rawPassword);
+
+        // 암호화되지 않은 비밀번호(raw-)와 암호화된 비밀번호(encoded-)가 일치하는지 비교
+        boolean matches(CharSequence rawPassword, String encodedPassword);
+
+        // 암호화된 비밀번호를 다시 암호화하고자 할 경우 true를 return하게 설정
+        default boolean upgradeEncoding(String encodedPassword) { return false; };
+    }
+
+사용방법
+
+    private PasswordEncoder passwordEncoder;
+
+    /*암호화 사용*/
+    this.passwordEncoder.encode(user.getPassword()) ;
+
+    /*비밀번호 확인*/
+    passwordEncoder.matches(password, dbPassword);
+
+    이때 password는 입력받은 값이고 dbPassword는 암호화되어 저장된 값이다. 
+    입렵받은 값을 인코딩하여 비교 하는것이 아닌 인코딩 전의 값과 인코딩되어 저장된 값을 비교하는것.
+
+------------BcryptPasswordEncoder
+bcrypt란 Blowfish 알고리즘을 기반으로 설계한 암호화 해시 알고리즘이다. 
+비밀번호를 저장하기 위한 목적으로 개발되었으며, 지금까지 사용되고 있다. 입력값을 72byte로 제한하고 있다. 128byte를 맞추기 위함
+
+BCryptPasswordEncoder의 속도는 강도(strength)를 조정해서 조절할 수 있다. 
+강도는 4 ~ 31까지 설정할 수 있고 BcryptPasswordEncoder는 default 강도로 아래와 같이 10을 사용합니다.
+
+public BCryptPasswordEncoder(BCryptVersion version, int strength, SecureRandom random) {
+  if (strength != -1 && (strength < BCrypt.MIN_LOG_ROUNDS || strength > BCrypt.MAX_LOG_ROUNDS)) {
+    throw new IllegalArgumentException("Bad strength");
+  }
+  this.version = version;
+  this.strength = strength == -1 ? 10 : strength; // 지정하지 않으면 강도를 10으로 설정
+  this.random = random;
+}
+
+BCryptPasswordEncoder의 강도를 16으로 설정한 예제입니다.
+
+// Create an encoder with strength 16
+BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(16);
+String result = encoder.encode("myPassword");
+assertTrue(encoder.matches("myPassword", result));
+
+Argon2PasswordEncoder
+Argon2 해시 함수 를 사용해 비밀번호를 해시하는 PasswordEncoder이다. 
+Argon2는 Password Cracking을 방지하기 위해 다른 PasswordEncoder와 마찬가지로 의도적으로 느리게 실행되도록 설정되어 있다. 
+bcrypt나 scrypt 는 컴퓨팅 파워가 지금보다 딸리고 GPU 나 전용 ASIC 으로 병렬 계산이 어려운 시대에 설계되었으므로 새로운 알고리즘이 필요하여 나온 방식
+암호를 해싱하는데 걸리는 시간이나 소요되는 메모리 양을 설정할 수 있게 설계
+
+Pbkdf2PasswordEncoder
+PBKDF2 해시 함수 를 사용해 비밀번호를 해시하는 PasswordEncoder이다. 
+FIPS 인증(Federal Information Processing Standards, 미 연방 시스템 내에서 중요한 데이터를 보호하기 위한 필수 표준)
+PBKDF2(Password-Based Key Derivation Function 2)는 RSA 연구소의 공개 키 암호화 표준
+
+SCryptPasswordEncoder
+SCrypt 해시 함수를 사용해 비밀번호를 해시하는 PasswordEncoder이다. 2016년에 RFC 7914로 표준화되었다.
+스크립트 알고리즘(scrypt algorithm)는 콜린 퍼시벌(Colin Percival)이 개발한 암호화된 키 추출 알고리즘이다. 
+스크립트 알고리즘은 비트코인의 주요 대안 중 하나인 라이트코인 작업에 사용되는 알고리즘
+
+PBKDF2는 가벼운 알고리즘으로써 모든 기기에 구현 가능하다는 장점이 있지만, 
+이 장점이 역으로 공격자가 가볍게 수백, 수천개의 병렬 연산으로 무차별 대입 공격을 가능하게 할 수 있다는 점이다.
+scrypt는 역으로 알고리즘이 많은 자원을 요구하며, PBKDF2보다 상대적으로 많은 메모리 용량을 요구함으로써, 공격자가 병렬 연산을 어렵게 한다.
+
+
+https://maximsungmo.github.io/spring/annotation-columntransformer/
+
+https://velog.io/@corgi/Spring-Security-PasswordEncoder%EB%9E%80-4kkyw8gi
+
+https://jeonghoj.github.io/2017/%EC%95%94%ED%98%B8%ED%99%94-%ED%95%B4%EC%8B%9C-%EC%95%8C%EA%B3%A0%EB%A6%AC%EC%A6%98/
