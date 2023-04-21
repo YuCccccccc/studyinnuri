@@ -1,0 +1,49 @@
+<2022-06-15>
+클래스패스에 있는 파일에 접근하기
+	resources 하위 파일 빌드 과정
+		resources 폴더에 있는 파일들은 컴파일 타임에 classpath로 이동하여 함께 포함되어 빌드된다.
+		yml 등은 알아서 jar 내에 있는 것을 사용한다.
+
+	File 인터페이스는 파일시스템을 사용한다.
+		소스코드 내에서 classpath를 쓰지 않고 그냥 File에 접근하면, 실제 파일시스템에 있는 해당 경로로 찾는다.
+		경로를 상대경로로 지정한 경우, 상대경로는 "java -jar" 명령어를 실행하는 위치에 따라 결정되기 때문에
+		어디서 명령어를 실행하느냐에 따라 파일을 못찾을 수도 있다.
+
+	클래스패스 파일에 접근하기
+		1. Resource 인터페이스 사용
+			ClassPathResource
+				new ClassPathResource("data/employees.dat");
+				new ClassPathResource("data/employees.dat", this.getClass().getClassLoader());
+				new ClassPathResource("data/employees.dat", Employee.class.getClassLoader());
+
+				파일로 
+					new ClassPathResource("../../../data/employees.dat", Example.class).getFile();
+				InputStream 으로 
+					InputStream resource = new ClassPathResource("data/employees.dat").getInputStream();
+		
+		2. @Value 사용
+			@Value("classpath:data/resource-data.txt") Resource resourceFile;
+			@Value("file:...")
+			@Value("url:...")
+		
+		3. ResourceLoader 사용
+			@Autowired ResourceLoader resourceLoader;
+			public Resource loadEmployeesWithResourceLoader() {
+				resourceLoader.getResource("classpath:data/employees.dat");
+			}
+
+			ResourceLoader는 모든 ApplicationContext에 의해 구현되었기 때문에, 아래처럼 쓸 수 있다.
+			
+			ApplicationContext context;
+			public Resource loadEmployeesWithApplicationContext() {
+				return context.getResource("classpath:data/employees.dat");
+			}
+		
+		4. ResourceUtils 사용
+			// Javadoc 에서는 내부용으로만 사용하라고 함.
+			ResourceUtils.getFile("classpath:data/employees.dat");
+
+	발췌문서
+		https://www.baeldung.com/spring-classpath-file-access
+	참고문서
+		https://umbum.dev/1049

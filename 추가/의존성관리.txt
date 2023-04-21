@@ -1,0 +1,20 @@
+<2022-12-01>
+    의존성 관리
+        [implementation, api(compile)]
+            그래이들에서 라이브러리를 적용시키는 키워드.
+            
+            ex)
+                모듈B --> 모듈A --> 라이브러리z
+            * 키워드에 따라 라이브러리 적용 범위가 다르다.
+            api(compile) vs implementation
+                api : 모듈B에서 api(모듈A), 모듈A에서 api(라이브러리z)하면, 모듈B에서 라이브러리z도 가져온다.
+                implementation : 모듈B에서 implementation(모듈A), 모듈A에서 implementation(라이브러리z)하면, 모듈B에서 라이브러리z는 가져오지 못한다.
+                api의 문제
+                    1) 레이어별로 모듈이 분리되는데, api를 사용하면 controller에서 entity 모듈을 알게 되어 계층을 건너뛴 참조가 일어날 수 있다.
+                    2) 모듈A에 추가된 라이브러리z가 모듈B에도 추가되기 때문에 Leak이 발생한다.
+                implementation 장점
+                    모듈B가 모듈A에만 의존하게 함으로써, 모듈간 의존성을 줄인다.
+                @Conclusion
+                    api말고, implementation만 사용하자.
+            * compile : 최신 그래이들에서 제거됨.
+            참고 : https://kotlinworld.com/317

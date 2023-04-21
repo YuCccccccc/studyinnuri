@@ -1,0 +1,61 @@
+<2022-06-08>
+[리스트 리터럴 선언]
+
+    배열로 선언하기
+        List<String> list = Arrays.asList("foo", "bar");   
+        //리스트인데도, 고정 사이즈라서 더 추가할 수 없음
+
+    스트림으로 선언하기
+        List<String> list = Stream.of("foo", "bar").collect(Collectors.toList());
+
+    팩토리 메소드로 선언하기 (Java 9)
+        List<String> list = List.of("foo", "bar", "baz");
+        Set<String> set = Set.of("foo", "bar", "baz");
+
+    2중 중괄호 사용
+        List<String> cities = new ArrayList() {{
+            add("New York");
+            add("Rio");
+            add("Tokyo");
+        }};
+
+    참고
+        https://www.baeldung.com/java-init-list-one-line
+
+[인터셉터]
+    Interceptor
+        스프링의 Spring Context의 기능으로,
+        임의의 URI를 호출시 DispatcherServlet에서 해당 컨트롤러가 처리되기 전과 후에 발생하는 이벤트
+        
+        필터 vs 인터셉터
+            필터가 인터셉터보다 앞에 있으며,
+            인터셉터는 스프링에 의해서 관리된다.
+
+    요청 흐름
+        1) 클라이언트가 Request를 요청 --> Filter --> DispatcherServlet
+        2) DispatcherServlet : HandlerMapping를 통해, 요청된 URI에 매핑된 컨트롤러를 확인
+        3) DispatcherServlet --> HandlerInterceptor --> Handler (컨트롤러) --> 비즈니스 로직 : HandlerInterceptor로 반환
+        4) HandlerInterceptor : DispatcherServlet로 반환
+        5) DispatcherServlet : ViewResolver를 통해, 요청된 URI에 매핑된 뷰 확인
+        6) DispatcherServlet --> View 렌더링
+    
+    생성
+        1) 인터셉터 생성
+            public class CustomInterceptor implements HandlerInterceptor {
+                @Override
+                public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+                    // 인터셉터 실제 코드
+                    return true;
+                }
+            }
+
+        2) 인터셉터 등록
+            @Configuration
+            public class WebConfig implements WebMvcConfigurer {
+                @Override
+                public void addInterceptors(InterceptorRegistry registry) {
+                    registry.addInterceptor(new CustomInterceptor())
+                        .addPathPatterns("/v1/*")
+                        .excludePathPatterns("/board");
+                }
+            }

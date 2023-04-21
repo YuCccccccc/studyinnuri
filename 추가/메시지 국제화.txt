@@ -1,0 +1,47 @@
+    메시지 국제화
+        메시지 기능
+            화면에 출력되는 다양한 문구,메시지를 한 곳에서 관리하는 기능.
+            properties 파일에 메시지를 정의하고, 타임리프에서 메시지 사용식으로 사용한다.
+            메시지 관리 기능은 MessageSource 인터페이스가 필요하다.
+
+        국제화 기능
+            다국어 처리된 메시지를 제공하며, 메시지 파일을 각 나라별로 관리하여 메시지를 국제화한다.
+
+            Request의 헤더를 보고 영어 요청에는 영어로, 한국어 요청에는 한국어로 처리하면 된다.
+            직접 구현할 수도 있지만 스프링은 메시지&국제화를 기본 제공하며, 
+            타임리프는 스프링의 메시지 국제화와 통합된다.
+        
+        준비
+            관리파일
+                /resource/messages.properties ====================
+                hello=안녕
+                hello.name=안녕. {0}
+                ===================================================
+                resource/messages_en.properties =================
+                hello=hello
+                hello.name=hello. {0}
+                ===================================================
+            
+            빈 자동등록
+                스프링부트는 MessageSource를 자동으로 스프링빈으로 등록한다.
+
+            빈 직접 등록시
+                @Bean
+                public MessageSource messageSource() {
+                    ResourceBundleMessageSource messageSource = new ResourceBundleMessageSource();
+                    
+                    /* messages.properties, errors.properties 파일을 읽는다. 국제화 설정을 하려면 messages_ko.properties 처럼 언어정보를 넣어서 만든다. */
+                    messageSource.setBasenames("messages", "errors");   
+                    // 스프링 설정으로도 가능하다. spring.messages.basename=messages,config.i18n.messages
+
+                    messageSource.setDefaultEncoding("utf-8");
+                    return messageSource;
+                }
+        사용
+            타임리프 메시지 표현식
+                <label for="itemName" th:text="#{item.itemName}"></label>
+
+            자바에서 메시지 사용
+                @Autowired MessageSource ms;
+                ms.getMessage("hello", null, null);
+                ms.getMessage("hello", new Object[]{"첫번째 아규먼트"}, Locale.ENGLISH);

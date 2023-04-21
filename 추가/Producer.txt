@@ -1,0 +1,114 @@
+<2022-08-10>
+Producer 파헤치기
+    예제코드 (토픽에 메시지 전송)
+        /* 프로듀서가 사용할 설정정보(serializer, ack, batchsize 등) */
+        Properties prop = Properties();
+        prop.put("bootstrap.servers", "kafka01:9092,kafka01:9092,kafka01:9092");
+        prop.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+        prop.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+        KafkaProducer<Integer, String> producer = new KafkaProducer<>(prop);
+        /* send 메소드로 카프카 브로커에 메시지 전달. ProducerRecord가 카프카 메시지다. */
+            // 전송 결과를 확인하지 않는 로직 
+            producer.send(new ProducerRecord<>("topicName", "key", "value"));
+            producer.send(new ProducerRecord<>("topicName", "value"));
+            // 전송 결과를 확인하는 로직 : 방법 1 Blocking
+            Future<RecordMetadata> future = producer.send(new ProducerRecord<>("topicName", "value"));
+            try {
+                RecordMetadata meta = future.get();     // Blocking 발생
+                // 단점 : 블로킹이 발생하여 배치에 쌓이지가 않아서 처리량이 떨어진다.
+                // 장점 : 대신 건별로 확실한 전송 결과를 알 수 있다.
+            } catch () {
+            }
+            
+            // 전송 결과를 확인하는 로직 : 방법 2 Async
+            producer.send(new ProducerRecord<>("topicName", "value"),
+                new Callback() {
+                    @Override
+                    public void onCompletion(RecordMetadata metadata, Exception ex) {
+                        // 장점 : 블로킹이 발생하지 않기 때문에 처리량이 떨어지지 않는다.
+                    }
+                });
+        producer.close();
+    
+    프로듀서의 send() 내부 동작 흐름
+        1. Serializer를 통해 byte 배열로 변환
+        2. Partitioner로 메시지를 저장할 브로커쪽의 파티션 결정
+        3. 카프카 메시지를 버퍼에 저장
+            여러 메시지를 저장할 수 있는 "배치" 단위로 저장.
+        4. Sender가 배치를 차례대로 카프카 브로커로 전송
+        5. 전송 결과에 대한 처리
+    
+    Sender
+        프로듀서의 버퍼에서 배치를 차례로 꺼내서 브로커로 보낸다.
+        send() 메소드와는 별도의 쓰레드로 동작한다.
+        Sender는 Sender대로 브로커로 메시지를 보내고,
+        동시에 send()는 자기대로 프로듀서 버퍼에 메시지를 쌓는다.
+        
+        배치가 다 차지 않아도 메시지를 브로커로 전송한다.
+        ** 이부분때문에 배치설정+Sender설정이 처리 성능에 영향을 준다. **
+        
+    설정
+        프로듀서 설정
+            ack
+                메시지 전송 보장여부와 관련된 설정값.
+                0 : 브로커로부터 전송결과 응답을 기다리지 않음. 전송보장도 되지 않음.
+                1 : 파티션의 리더에 저장되면 응답을 받는다. 리더에 장애가 발생하면 메시지가 유실될 수 있다.
+                all(혹은 -1) : 모든 레플리카에 저장되어야 응답을 받는다.
+                    min.insync.replicas 설정에 따라서 달라질 수 있다.
+            batch.size
+                배치 크기. 이 크기만큼 배치가 다 차면 바로 전송한다.
+            linger.ms
+                전송 대기 시간. 약간의 지연시간을 주면 한번에 보내는 메시지 개수가 올라간다.
+                0이면 배치를 바로 전송하고, 대기시간이 있으면 그 시간만큼 기다렸다가 메시지를 전송하고, 
+                기다리는 동안 send()에 의해서 메시지가 배치에 쌓인다.
+            max.in.flight.requests.per.connection
+                블로킹없이 한 커넥션에서 전송할 수 있는 최대 전송중인 요청 배치 개수 
+                이 값이 1보다 크면 재시도 시점에 따라서 메시지의 순서가 바뀔수도 있다.
+                전송순서가 매우 중요하다면 이 값을 1로 지정하여, 한번에 하나의 배치만 전송하도록 한다.
+            (프로듀서?) retries
+                재시도 관련 설정
+            (프로듀서?) enable.idempotence
+                재시도 중복 관련 설정
+        브로커 설정
+            min.insync.replicas = 프로듀서 ack 옵션이 all일때, 전송성공처리를 위한 최소 레플리카 수
+                ack + min.insync.replicas
+                    ex 1) 레플리카 3개, ack = all, min.insync.replicas = 2
+                        리더 + 팔로워 1개에 저장되면 전송 성공으로 응답한다.
+                    ex 2) 레플리카 3개, ack = all, min.insync.replicas = 1
+                        리더에 저장되면 전송 성공으로 응답한다.
+                        리더 장애시 메시지가 유실될 수 있다.
+                    ex 3) 레플리카 3개, ack = all, min.insync.replicas = 3
+                        리더 + 팔로워 2개에 저장되어야만 전송 성공으로 응답한다.
+                        팔로워중 하나라도 장애가 발생하면 레플리카 부족으로 저장에 실패한다.
+    
+    프로듀서 에러
+        실패 유형
+            전송 과정에서 실패 
+                전송 타임아웃 (일시적 네트워크 오류)
+                리더 다운됐을 때 새 리더 선출 진행중 
+                브로커 설정 메시지 크기 한도 초과
+                등..
+            전송 전에 실패         
+                직렬화 실패, 프로듀서 자체 요청 크기 제한 초과
+                프로듀서 버퍼가 차서 기다린 시간이 최대 대기시간 초과
+                등..
+        
+        실패 대응
+            재시도
+                재시도 가능한 에러는 재시도 처리.
+                무한 재시도는 메시지가 밀리기 때문에 하면 안된다. 
+                시점
+                    1. 프로듀서는 재시도 가능한 경우에 기본적으로 재시도를 한다.
+                    2. send() 에서 Exception 발생하면 타입에 따라 send() 재호출
+                    3. 콜백 메소드에서 Exception 받으면 타입에 따라 send() 재호출 
+                주의사항
+                    재시도 중복가능성
+                        브로커의 전송결과 응답이 늦게와서 재시도할 경우, 메시지 전송이 중복으로 발생될 수 있다.
+                    메시지 순서 변경 가능성
+                        max.in.flight.requests.per.connection 을 2 이상 설정하면, 순서가 바뀔수도 있다.
+            기록
+                실패한 메시지를 별도 파일이나 DB에 저장하여, 추후에 수동/자동으로 보정작업을 진행한다.
+                시점
+                    1. send() 에서 Exception 발생시
+                    2. send() 에서 전달한 콜백에서 Exception 발생시
+                    3. send() 가 리턴한 Future의 get()에서 Exception 발생시

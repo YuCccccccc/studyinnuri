@@ -1,0 +1,14 @@
+ssh 단축어
+        ssh user@host를 반복적으로 입력하지 않아도, 단축어를 사용하여 접속할 수 있다.
+    
+        1. 단축어 파일 생성
+            vi ~/.ssh/config
+        2. 단축어 정보 저장
+            Host api-stg
+                HostName xxx.xxx.xxx.xxx
+                User zino
+                IdentityFile /home/zino/zino-private.pem
+        3. 단축어 파일 권한 변경
+            chmod 600 ~/.ssh/config
+        4. 단축어 사용
+            ssh api-stg

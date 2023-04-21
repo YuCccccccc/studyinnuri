@@ -1,0 +1,30 @@
+ Docker Registry 
+ -  Docker 컨테이너 이미지를 저장하고 공유할 수 있는 저장소
+ -  Docker 는 이미 docker registry 라는 이름으로 개인 이미지 저장소를 컨테이너화 하였고 Harbor 는 내부적으로 이 docker registry 를 사용하고 있다
+
+사용자는 이런 image 저장소에서 원하는 image 파일을 Download (Pull)받아서 본인의 docker 에서 image를 Run 할 수 가 있음
+Docker Hub는 기본정책이 mage pull rate를 제한한다. 보통 forward proxy를 이용하므로 이러한 image pull rate를 초과할 가능성이 매우 높다. 
+    익명 및 무료 Docker Hub 사용자는 6 시간당 100 개 및 200 개의 컨테이너 이미지 풀 요청으로 제한
+
+도커 레지스트리와 레파지토리의 차이 
+    레지스트리는 이미지를 관리하는 공간, 레파지토리는 레지스트리 내의 도커 이미지가 저장되는 공간으로 이미지 이름이 사용되기도 함. 깃헙의 레파지토리와 비슷한 역할.
+
+로컬 환경에서 레지스트리 구성
+    터미널에서 아래의 명령어를 실행한다.
+    docker pull registry
+    위의 명령어는 도커에서 레지스트리 이미지를 내려받는 명령어.
+    docker run -d -p 5000:5000 --restart always --name registry registry:2
+    도커에ㅓㅅ 5000번 포트를 이용하여 registry:2 이미지를 registry 라는 이름으로 실행.
+    이렇게하면 해당 컨테이너가 도커레지스트리 역할을 한다. 
+
+    레지스트리에 이미지를 push하기 위해서는 tag 명령어를 통해 dockerhub에 이미지를 push할 때와 마찬가지로 양식에 맞게 변경
+    docker tag <레파지토리명:태그명> localhost:5000/<레파지토리명:태그명>
+
+    tag 명령어는 도커 이미지 명을 바꿀때 사용하는 명령어. docker tag 옛이미지명 새이미지명
+
+    docker push 명령어를 실행한다.
+    digest가 출력되었으면 정상적으로 로컬 레지스트리에 이미지가 push된것.
+
+    이미지를 내려 받을때 docker image pull localhost:5000/<레파지토리명:태그명>
+
+

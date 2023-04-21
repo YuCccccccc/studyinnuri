@@ -1,0 +1,129 @@
+<2022-10-12>
+    카프카 실습
+        준비
+            1) 아파치 카프카 공식 홈페이지에서 원하는 버전의 카프카(.tgz)를 다운로드 받는다.
+                kafka_2.13-3.2.0.tgz
+            2) 압축을 푼다.
+                tar -xvzf kafka_2.13-3.2.0.tgz
+            3) 예제 프로젝트를 생성한 후, 의존성 추가
+                dependencies {
+                    implementation 'org.apache.kafka:kafka-clients:3.0.0'
+                    implementation 'org.apache.kafka:kafka-streams:3.0.0'
+                    implementation 'org.apache.kafka:kafka_2.13:3.0.0'
+                }
+        
+        서버 실행
+            1) 주키퍼 실행 (새로운 터미널로)
+                bin/zookeeper-server-start.sh config/zookeeper.properties
+                
+                이런 로그가 출력되면 정상
+                "INFO binding to port 0.0.0.0/0.0.0.0:2181 (org.apache.zookeeper.server.NIOServerCnxnFactory)"
+​
+            2) 카프카 실행 (새로운 터미널로)
+                bin/kafka-server-start.sh config/server.properties
+                
+                이런 로그가 출력되면 정상
+                "INFO [Kafka Server 0], started (kafka.server.KafkaServer)"
+​
+            3) 포트 확인
+                netstat -an | grep 2181
+                "tcp46  0   0   *.2181      *.*     LISTEN"
+        
+        예제1 (명령어로 진행)
+            1) 토픽 생성 (새로운 터미널로)
+                bin/kafka-topics.sh --create --topic quickstart-events --bootstrap-server localhost:9092
+                
+                "Created topic quickstart-events."
+​
+            2) 토픽 확인
+                bin/kafka-topics.sh --describe --topic quickstart-events --bootstrap-server localhost:9092
+                
+                "Topic: quickstart-events	TopicId: fRgd4seKQWGz3jmC-JtLhg	PartitionCount: 1	ReplicationFactor: 1	Configs: segment.bytes=1073741824
+	                Topic: quickstart-events	Partition: 0	Leader: 0	Replicas: 0	Isr: 0"
+            
+            3) 프로듀서로 메시지 발행
+                6-1) 프로듀서 실행
+                    bin/kafka-console-producer.sh --topic quickstart-events --bootstrap-server localhost:9092
+​
+                6-2) 메시지 입력
+                    대화창이 실행되면 메시지를 입력하고, ctrl + c로 입력 종료 
+            
+            4) 컨슈머 실행 
+                bin/kafka-console-consumer.sh --topic quickstart-events --from-beginning --bootstrap-server localhost:9092
+            
+            5) 프로듀서로 발행한 메시지가 출력되는지 확인
+        
+        예제2 (코드로 진행)
+            컨슈머
+                import org.apache.kafka.clients.consumer.ConsumerRecord;
+                import org.apache.kafka.clients.consumer.ConsumerRecords;
+                import org.apache.kafka.clients.consumer.KafkaConsumer;
+​
+                import java.util.Arrays;
+                import java.util.Properties;
+​
+                public class Consumer {
+​
+                    public static void main(String[] args) {
+​
+                        Properties configs = new Properties();
+                        configs.put("bootstrap.servers", "localhost:9092"); // kafka server host 및 port
+                        configs.put("session.timeout.ms", "10000"); // session 설정
+                        configs.put("group.id", "quickstart-events");   // topic 설정
+                        configs.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");    // key deserializer
+                        configs.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");  // value deserializer
+​
+                        KafkaConsumer<String, String> consumer = new KafkaConsumer<String, String>(configs);    // consumer 생성
+                        consumer.subscribe(Arrays.asList("quickstart-events")); // topic 설정
+​
+                        while (true) {
+                            ConsumerRecords<String, String> records = consumer.poll(500);
+                            for (ConsumerRecord<String, String> record : records) {
+                                String input = record.topic();
+                                if ("quickstart-events".equals(input)) {
+                                    System.out.println(record.value());
+                                } else {
+                                    throw new IllegalStateException("get message on topic " + record.topic());
+                                }
+                            }
+                        }
+                    }
+                }
+​
+            프로듀서
+                import org.apache.kafka.clients.producer.KafkaProducer;
+                import org.apache.kafka.clients.producer.ProducerRecord;
+​
+                import java.io.IOException;
+                import java.util.Properties;
+​
+                public class Producer {
+​
+                    public static void main(String[] args) throws IOException {
+​
+                        Properties configs = new Properties();
+                        configs.put("bootstrap.servers", "localhost:9092"); // kafka host 및 server 설정
+                        configs.put("acks", "all");                         // 자신이 보낸 메시지에 대해 카프카로부터 확인을 기다리지 않습니다.
+                        configs.put("block.on.buffer.full", "true");        // 서버로 보낼 레코드를 버퍼링 할 때 사용할 수 있는 전체 메모리의 바이트수
+                        configs.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");   // serialize 설정
+                        configs.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer"); // serialize 설정
+​
+                        // producer 생성
+                        KafkaProducer<String, String> producer = new KafkaProducer<String, String>(configs);
+​
+                        // message 전달
+                        for (int i = 0; i < 5; i++) {
+                            String v = "hello"+i;
+                            producer.send(new ProducerRecord<String, String>("quickstart-events", v));
+                        }
+​
+                        // 종료
+                        producer.flush();
+                        producer.close();
+                    }
+                }
+​
+    참고문헌
+        1차 https://webfirewood.tistory.com/153
+        2차 https://alphahackerhan.tistory.com/11
+        리눅스 명령어 https://recipes4dev.tistory.com/171

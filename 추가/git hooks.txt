@@ -1,0 +1,90 @@
+깃 훅 (Git Hooks)
+    Git에서 어떤 이벤트가 생겼을 때 자동으로 특정 스크립트를 실행하도록 할 수 있다.
+    Git저장소인 .git/hooks 가 기본 디렉토리이며, 여기에 스크립트를 작성하여 사용할 수 있다.
+    
+    클라이언트 훅 Client Hook
+        커밋이나 Merge 할 때 실행된다.
+        * 기본적으로 클라이언트 훅은 저장소를 Clone해도 복사되지 않는다.
+        커밋 워크플로 훅 committing-workflow hooks
+            pre-commit
+                커밋할 때 가장 먼저 호출되는 훅. 커밋메시지 작성하기 전에 호출된다.
+                이 훅의 Exit 코드가 0이 아니면 커밋은 취소된다.
+                커밋할 때 꼭 확인해야 하는 것은 이 훅으로 확인한다.
+                보통 코드 스타일 검사나 주석 검사 등을 한다.
+            prepare-commit-msg (arg: 커밋메시지 파일경로, 커밋종류)
+                Git이 커밋 메시지를 생성하고 나서 편집기를 실행하기 전에 호출된다.
+                사람이 커밋메시지를 수정하기 전에 먼저 프로그램으로 손보고 싶을 때 사용한다.
+            commit-msg (arg:커밋메시지 파일경로)
+                최종적으로 커밋이 완료되기 전에 호출된다.
+                이 훅이 0이 아닌 값을 반환하면 커밋이 실패한다.
+            post-commit
+                커밋이 완료된 후 호출된다. 보통 커밋된 것을 누군가에게 알릴 때 사용한다.
+        이메일 워크플로 훅 
+        나머지 hook
+            pre-rebase
+            post-rewrite
+            post-checkout
+            post-merge
+            pre-push
+                git push 명령을 실행하면 원격저장소로 데이터를 전송하기 전에 호출된다.
+                아규먼트는 원격저장소이름, 원격저장소주소, stdin으로 업데이트할 해시리스트를 받는다.
+            pre-auto-gc
+    서버 Hook
+        Push 전후에 서버에서 실행된다. 
+        Push 전에 실행되는 훅이 0이 아닌 값을 반환하면 Push는 거절된다.
+        pre-receive
+            push하면 가장 처음 호출된다.
+        update
+            pre-receive와 거의 같으며, push할 때 브랜치마다 하나씩 호출된다는 점만 다르다.
+        post-receive
+            Push 이후에 호출된다. 이 훅으로 사용자나 서비스에 알림 메시지를 보낼 수 있다.
+            
+[Embedded MySQL]
+    애플리케이션 내장형 MySQL
+    (테스트 실행할 때마다 새로 올라오고, 데이터 보관이 안되는 듯하다.)
+    
+    Spring Boot에 적용
+        준비
+            1. 빌드 의존성 추가
+                gradle
+                    testImplementation 'com.wix:wix-embedded-mysql:4.6.2'
+            2. MySQL 설정
+                @Transactional
+                @SpringBootTest
+                @ActiveProfiles("test")
+                public class EmbeddedMysqlSupport {
+                    private static EmbeddedMysql server;
+                    static {
+                        MysqldConfig config = MysqldConfig
+                            .aMysqldConfig(Version.v8_latest)
+                            .withCharset(Charset.aCharset("utf8mb4", "utf8mb4_bin"))
+                            .withPort(13306)
+                            .withUser("test_dev3", "test_dev3")
+                            .withTimeout(2, TimeUnit.MINUTES)
+                            .withTimeZone(TimeZone.getTimeZone("UTC"))
+                            .withServerVariable("sql_mode",
+                                "ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION")
+                            .withServerVariable("max_connect_errors", 1024)
+                            .build();
+                        server = EmbeddedMysql.anEmbeddedMysql(config)
+                            .addSchema("content_review")
+                            .addSchema("content_review_log")
+                            .start();
+                    }
+                }
+            
+            3. test profile 설정
+                application-test.yml
+                    spring:
+                        config:
+                            activate:
+                                on-profile: test
+                        
+                        datasource:
+                            url: jdbc:mysql://localhost:13306/content_review?...
+                            username: test
+                            password: test1234
+        사용
+            class ReviewV1ControllerTest extends EmbeddedMysqlSupport {
+                // 테스트 클래스가 EmbeddedMysqlSupport 를 상속하도록 한다.
+            }

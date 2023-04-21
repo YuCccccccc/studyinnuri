@@ -1,0 +1,71 @@
+
+properties
+    key-value 형식
+    값을 지정할 때, ${} 을 사용해 다른 환경 변수의 값을 참조할 수 있다.
+
+    app.name=MyApp
+    app.description=${app.name} is a Spring Boot application
+
+    list 구조 사용가능
+        하나의 속성에 다른 value를 갖는경우 배열 인덱스로 list 구조사용
+            application.servers[0].ip=127.0.0.1
+            application.servers[0].path=/path1
+            application.servers[1].ip=127.0.0.2
+            application.servers[1].path=/path2
+            application.servers[2].ip=127.0.0.3
+            application.servers[2].path=/path3
+
+    스프링 2.4부터 한 파일에서 다중 Profile를 정의할 수 있도록 지원
+        '#---' 로 Profile을 구별하여 사용한다.
+        logging.file.name=myapplication.log
+        bael.property=defaultValue
+        #---
+        spring.config.activate.on-profile=dev
+        spring.datasource.password=password
+        spring.datasource.url=jdbc:h2:dev
+        spring.datasource.username=SA
+        bael.property=devValue
+        #---
+        spring.config.activate.on-profile=prod
+        spring.datasource.password=password
+        spring.datasource.url=jdbc:h2:prod
+        spring.datasource.username=prodUser
+        bael.property=prodValue
+
+yaml
+    계층 적 구성 데이터를 지정하기위한 조금 더 편리한 형식   
+    spring:
+        datasource:
+            password: password
+            url: jdbc:h2:dev
+            username: SA
+
+    yaml 에서 list 
+        application:
+            servers:
+            -   ip: '127.0.0.1'
+                path: '/path1'
+            -   ip: '127.0.0.2'
+                path: '/path2'
+            -   ip: '127.0.0.3'
+                path: '/path3'
+
+    스프링 버전과 관계없이 YAML은 한 파일에서 다중 Profile를 정의할 수 있다.
+        '---' 로Profile을 구별
+        logging:
+            file:
+                name: myapplication.log
+        ---
+        spring:
+        config:
+            activate:
+            on-profile: staging
+        datasource:
+            password: 'password'
+            url: jdbc:h2:staging
+            username: SA
+        bael:
+        property: stagingValue
+  
+application.properties와 application.yml를 동시에 사용하지 않도록 주의하자.
+이 둘 간의 순서 차이가 있는데, application.properties가 항상 나중에 로드되어 YAML에 정의한 Profile 설정이 덮어씌여질 수 있기 때문

@@ -1,0 +1,67 @@
+<2023-03-15 (수)>
+    NodeJS 카프카 컨슈밍
+        1. 필요 환경변수 설정
+        2. 라이브러리 설치
+            lodash, kafkajs, axios
+        3. 컨슈밍 예제
+            const _ = require('lodash');
+            const { Kafka } = require('kafkajs');
+            const axios = require('axios').default;
+            /* Variables */
+            const CONSUMER_GROUP_ID = "Dev3-ExceptionNotification";
+            const TOPIC = "exception-notification";
+            const BROKERS = process.env.CLI_KAFKA_BROKER_SERVER.split(",");
+            const USER_NAME = process.env.CLI_KAFKA_USER_NAME;
+            const PASSWORD = process.env.CLI_KAFKA_USER_PASSWORD;
+            const SASL_MECHANISM = "scram-sha-512";   // 'plain' or 'scram-sha-256' or 'scram-sha-512'
+            const client = new Kafka({
+            clientId: "exception-notification",
+            brokers: BROKERS,
+            ssl: false,
+            sasl: {
+                mechanism: SASL_MECHANISM,
+                username: USER_NAME,
+                password: PASSWORD
+            },
+            });
+            const consumer = client.consumer({ groupId: CONSUMER_GROUP_ID });
+            /* Main Logic */
+            // 1. 종료 이벤트 알림 설정 : 예외 발생
+            const errorTypes = ['uncaughtException'];
+            errorTypes.forEach(type => {
+            process.on(type, async e => {
+                try {
+                    await consumer.disconnect();
+                    process.exit(0);
+                } catch (_) {
+                    process.exit(1);
+                }
+            });
+            });
+            // 2. 종료 이벤트 알림 설정 : 프로세스 종료 명령
+            const signalTraps = ['SIGINT', 'SIGTERM'];    // pm2 kill, pm2 stop/restart/delete 모두 SIGINT
+            signalTraps.forEach(type => {
+            process.once(type, async () => {
+                try {
+                    await consumer.disconnect();
+                } finally {
+                    process.kill(process.pid, type);
+                }
+            });
+            })
+            // 3. 함수 선언
+            const consume = async (topic, consumerGroupId) => {
+            await consumer.connect();
+            await consumer.subscribe({ topic: topic, fromBeginning: false });
+            await consumer.run({
+                autoCommit: true,
+                eachMessage: async ({ topic, partition, message }) => {
+                // message 슬랙 알림
+                },
+            });
+            };
+            // 4. 함수 실행
+            consume(TOPIC, CONSUMER_GROUP_ID);
+        4. PM2 (프로세스 매니저)
+            레퍼런스
+                https://pm2.keymetrics.io/docs/usage/quick-start/

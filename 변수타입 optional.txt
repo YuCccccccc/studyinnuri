@@ -1,0 +1,46 @@
+Optional
+    Java8에서는 Optional<T> 클래스를 사용해 NullPointerException을 방지할 수 있도록 도와준다. 
+    Optional<T>는 null이 올 수 있는 값을 감싸는 Wrapper 클래스
+
+    --- 값이 없을때 optional 생성
+    Optional<String> optional = Optional.empty();
+
+    public final class Optional<T> {
+
+        private static final Optional<?> EMPTY = new Optional<>(); -- 스태틱 변수로 empty를 미리 생성해서 가지고 잇다.
+        private final T value;
+        
+        private Optional() {
+            this.value = null;
+        }
+
+        ...
+
+    }
+
+    --- Optional의 value는 절대 null이 아닐경우 .of로 생성해준다. 
+    Optional<String> optional = Optional.of("MyName"); 
+    이때 optional 의 값이 null이면 NullPointerException이 발생한다. 
+
+    --- Optional의 value는 값이 있을 수도 있고 null 일 수도 있을 때는 .ofNullable로 생성.
+    Optional<String> optional = Optional.ofNullable(getName());
+
+    Optional은 값을 Wrapping하고 다시 풀고, null 일 경우에는 대체하는 함수를 호출하는 등의 오버헤드가 있으므로 잘못 사용하면 시스템 성능이 저하
+
+    - 래퍼 클래스(Wrapper class)
+    프로그램에 따라 기본 타입의 데이터를 객체로 취급해야 하는 경우가 있다.
+
+    메소드의 인수로 객체 타입만이 요구되면, 기본 타입의 데이터를 그대로 사용할 수는 없다.
+
+    이때에는 기본 타입의 데이터를 먼저 객체로 변환한 후 작업을 수행
+
+    기본 타입의 데이터를 래퍼 클래스의 인스턴스로 변환하는 과정을 박싱(Boxing)
+
+    반면 래퍼 클래스의 인스턴스에 저장된 값을 다시 기본 타입의 데이터로 꺼내는 과정을 언박싱(UnBoxing)
+    Integer num = new Integer(17); // 박싱
+    int n = num.intValue();        // 언박싱
+
+    Character ch = 'X'; // Character ch = new Character('X'); : 오토박싱
+    char c = ch;        // char c = ch.charValue();           : 오토언박싱
+
+

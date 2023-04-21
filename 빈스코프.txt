@@ -1,0 +1,30 @@
+
+말그대로 빈이 사용되어지는 범위(?)인데, 빈이 앱이 구동되는 동안 한개만 만들어서 쓸 것인지 
+HTTP요청마다 생성해서 쓸 것인지 등등를 결정하는 것이 스코프임.
+보통의 스프링 빈은 스프링 앱이 구동 될때 한번에 ApplicationContext에서 
+한 번에 모두 생성해서 하나의 클래스는 한 개의 빈만 가지지만 (Singleton), 
+때에 따라서는 HTTP요청마다 (Request) 다른 빈을 생성해서 쓸건지, 
+매번 사용될 때 마다 (Prototype) 빈을 생성해서 쓸건지 설정해서 쓸 수도 있다.
+
+
+singleton	(기본값) 스프링 IoC 컨테이너당 하나의 인스턴스만 사용 - 한마디로 앱이 구동되는 동안 하나만 쓴다는 거임
+prototype	매번 새로운 빈을 정의해서 사용
+request	HTTP라이프 사이클 마다 한개의 빈을 사용, web-aware 컨택스트에서만 사용가능 - ex. Applicaiton context
+session	HTTP 세션마다 하나의 빈을 사용, web-aware 컨택스트에서만 사용가능 - ex. Applicaiton context
+application	ServeltContext라이프사이클 동안 한개의 빈만 사용, web-aware 컨택스트에서만 사용가능 - ex. Applicaiton context
+websocket	websocket 라이프사이클 안에서 한개의 빈만 사용, web-aware 컨택스트에서만 사용가능 - ex. Applicaiton context
+
+
+
+@Component
+@Scope(value = "prototype")
+public class ProtoType {
+}
+
+Sinlgeton 스코프의 빈이 prototype의 빈을 주입받는 경우 오류 발생.
+싱글톤 스코프의 빈이 프로토타입 빈을 주입받으면 싱글톤의 프로토타입 빈은 매번 바뀌지 않고 같은 빈이 쓰임
+singleton 빈은 ApplicationContext가 처음 앱을 구동할때 빈을 만들고 빈을 주입해서 앱이 종료될 때 까지 
+계속 사용 되기 때문에 singleton 빈 안에 있는 prototype 빈도 처음 주입된 채로 그대로 사용
+
+
+

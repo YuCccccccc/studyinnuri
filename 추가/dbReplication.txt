@@ -1,0 +1,21 @@
+DB Replication
+    DB 이중화(다중화)
+        DB 요청은 insert, update, delete 보다 select가 훨씬 많기 때문에
+        @Transactional(readOnly=true) 가 붙은 select 요청은 읽기전용인 슬레이브 DB로 보내고
+        @Transactional(readOnly=false) 가 붙은 insert, update, delete 요청은 읽기-쓰기 가능한 마스터DB로 보낸다.
+    
+    마스터-슬레이브 구조
+        하나의 마스터가 여러 슬레이브를 가지는 구조
+
+    설정
+        spring:
+            datasource:
+                url: jdbc:mysql:replication://마스터주소:3306,슬레이브주소:3306/content_review?parameters...
+                username: zino
+                password: zinoPassword
+    
+    @Transactional(readOnly=true)
+    public getReviews(){}       // 슬레이브DB를 바라본다.
+
+    @Transactional
+    public insertReviews(){}    // 마스터DB를 바라본다.

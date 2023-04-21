@@ -1,0 +1,25 @@
+docker 에서 빌드시 오류.
+
+apple silicon mac에서 도커 빌드시 기존 형식인
+'docker build . -t 이미지명:TAG' 으로 빌드를 하면 
+OS/ARCH 가 arm64인 이미지 파일로 생성이 된다. 
+그리고 해당 파일로 도커에서 실행을 하면 apple silicon mac 이 아닌경우에 오류가 발생한다. 
+
+해결 방법
+이미지 파일 생성시에 build 옵션으로 --platform 옵션을 'linux/amd64' 로 지정해준다.
+'docker build --platform linux/amd64 -t 이미지명:TAG .' -- '.'은 Dockerfile 경로이므로 인텔리제이의 프로젝트 터미널에서 실행할때는 이미 Dockerfile의 경로 이므로 . 으로 해준다.
+Dockerfile 경로를 빼고 빌드하면 
+  "docker build" requires exactly 1 argument.
+  See 'docker build --help'.
+  Usage: docker build [OPTIONS] PATH | URL | -
+  Build an image from a Dockerfile
+오류 메세지를 볼수 있다.
+
+
+또는 docker의 build.sh 에서 
+DOCKER_BUILD_OPTS=
+if [[ $(arch) == 'arm64' ]]; then                         --- arch 는 명령어 터미널에서 확인가능.
+  DOCKER_BUILD_OPTS="--platform=linux/amd64"
+fi
+
+로 arm64일 경우 변경해주도록 설정을 해준다. 

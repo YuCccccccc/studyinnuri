@@ -1,0 +1,90 @@
+<2023-03-08>
+    Javascript Promise
+        Promise
+            비동기 작업이 완료된 이후에 다음 작업을 연결시켜 진행할 수 있다.
+            작업 결과에 따라 성공 또는 실패를 리턴하며, 결과값을 전달받을 수 있다.
+        
+        상태 3가지
+            1) pending 대기 : 처리가 완료되지 않은 상태
+            2) fulfilled 이행 : 성공적으로 처리가 완료된 상태
+            3) rejected 거부 : 처리가 실패로 끝난 상태
+        
+        체이닝
+            then 메서드에서 값을 return 키워드를 사용하면 결과 값이 기본 자료형이 아닌 
+            Promise 객체로 반환되기 때문에 이와같은 체인 형식이 가능
+        예제
+            function goToSchool() {
+                console.log("학교에 갑니다.");
+            }
+            function arrive_asis() {
+                setTimeout(function(){
+                    console.log("학교에 도착했습니다.");
+                }, 1000);
+            }
+            function study() {
+                console.log("열심히 공부합니다.");
+            }
+            // goToSchool();
+            // arrive_asis();
+            // study();
+            // ======================================
+            function arrive_tobe() {
+                return new Promise(function(resolve){
+                    setTimeout(function(){
+                        console.log("학교에 도착했습니다.");
+                        resolve();
+                    }, 1000);
+                });
+            }
+            // goToSchool();
+            // arrive_tobe().then(function(){
+            //     study();
+            // });
+            // ======================================
+            function arrive_adv() {
+                return new Promise(function(resolve, reject){
+                    
+                    // 1. 자체 로직
+                    setTimeout(function(){
+                        var status = Math.floor(Math.random() * 2);
+                        if (status === 1) {
+                            resolve("학교에 도착했습니다.");
+                        } else {
+                            reject("중간에 넘어져 다쳤습니다.");
+                        }
+                    }, 1000);
+                });
+            }
+            function cure() {
+                console.log("양호실에 가서 약을 발랐습니다.");
+            }
+            // goToSchool();
+            // arrive_adv()
+            // .then(function(res){
+            //     console.log(res);
+            //     study();
+            // })
+            // .catch(function(err){
+            //     console.log(err);
+            //     cure();
+            // });
+            // 체이닝 ======================================
+            new Promise(function(resolve, reject){
+                setTimeout(function() {
+                    resolve(1);
+                }, 2000);
+            })
+            .then(function(result) {
+                console.log(result); // 1
+                return result + 10;
+            })
+            .then(function(result) {
+                console.log(result); // 11
+                return result + 20;
+            })
+            .then(function(result) {
+                console.log(result); // 31
+            });
+        참고
+            https://sangminem.tistory.com/284
+            https://joshua1988.github.io/web-development/javascript/promise-for-beginners/

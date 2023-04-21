@@ -1,0 +1,45 @@
+
+도커 이미지로 컨테이너를 생성하면 이미지는 읽기 전용이 된다. 
+컨테이너로 작업한 내용은 컨테이너 레이어 라는 곳에서 생성된다.
+
+컨테이너 레이어는 이미지를 docker run 하면 컨테이너에 생성된다.
+컨테이너 레이어는 컨테이너를 삭제하면 같이 삭제되는 문제가 발생.
+이를 해결하기 위해서 나온것 중 하나가 볼륨이다. 
+
+호스트와 볼륨을 공유
+docker run -d 
+--name wordpressdb 
+-e MYSQL_ROOT_PASSWORD=password 
+-e MYSQL_DATABASE=wordpress 
+-v /home/ubuntu/wordpress_db:/var/lib/mysql 
+mysql:5.7
+
+-v 호스트의 경로:컨테이너에서의 경로 를 작성해주면 서로 공유가 된다. 
+이때 호스트에 경로가 존재하지 않아도 경로를 자동으로 생성해준다. 
+---- 컨테이너 디렉토리가 호스트 디렉토리 내용으로 덮어씌어진다. 
+
+볼륨 컨테이너 활용 
+volumn_container를 만든다.
+docker run -it --name volumn_container 
+-v /home/ubuntu/wordpress_db:/home/testdir_2 ubuntu:18.04
+
+/home/ubuntu/wordpress_db와 /home/testdir_2가 공유.
+
+docker run -it --name volumes_from_container 
+--volumes-from volumn_container ubuntu:18.04
+여기서 --volumes-from 옵션은 호스트와 직접 공유가 아닌 
+volumn_container와 호스트가 공유하고 있는 폴더를 volumes_from_container가 다시 공유
+
+이렇게 사용하면 볼륨 컨테이너인 volumn_container 하나를 두고 여러 컨테이너가 공유하는 방식으로 활용가능.
+
+
+도커 자체에서 제공하는 볼륨 활용
+docker volume create --name dockervolume
+으로 볼륨을 만들고 컨테이너를 생성할때 볼륨과 연결해준다.
+
+docker run -it --name myvolume_1 -v dockervolume:/root/ ubuntu:18.04
+볼륨 컨테이너 처럼 여러개의 컨테이너에서 공유되어 사용할수 있다. 
+docker inspect --type volume dockervolume으로 실제 어디에 저장되어 있는지 확인할수 있다. 
+
+docker volume prune 명령어로 사용되지 않고 방치되어 있는 볼륨을 삭제할수 있다. 
+

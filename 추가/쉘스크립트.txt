@@ -1,0 +1,77 @@
+<2022-06->
+[쉘 스크립트]
+    선언문
+        #!/bin/bash 
+
+        /bin/bash 를 사용하여 스크립트를 실행할거라는 뜻.
+        ps -ef | grep bash 를 쳐보면 bash가 떠있는 것이 보인다.
+
+    변수 선언
+        ZINO="HyunJinHo"
+        
+        소문자도 가능
+            zino="hyunjinho"
+        
+        기존 변수 사용
+            ZINO2=123bbb${ZINO}123ccc
+            ZINO4=${zino}${ZINO2}
+
+        변수에 변수 할당
+            ZINO3=$ZINO2
+        
+        연산결과를 할당
+            a=10
+            b=20
+            sum=$(($a + $b))    // 출력: 30
+        
+        명령어의 실행결과를 할당
+            1)
+                WORK_DIR="$(pwd)"
+            2)
+                var1=$(ls -al)
+                echo $var1
+
+    변수 출력
+        echo $WORK_DIR
+        echo ${WORK_DIR}
+    
+    변수 제거
+        var2="Hello"
+        unset var2
+    
+    if 조건문
+        기본 (띄어쓰기까지 정확히 맞추자)
+            VALUE=0
+            if [ $VALUE -eq 1 ]; then
+                echo "\$VALUE is 1"
+            else
+                echo "\$VALUE is not 1"
+            fi
+    
+        조건식 연산자
+            기본
+                !   NOT 연산
+                ||  OR 연산
+                &&  AND 연산
+            크기 비교 
+                -eq / -ne / -lt / -le / -gt / -ge 
+            문자열 길이 비교 
+                -z  문자열의 길이가 0인경우
+                -n  문자열의 길이가 0이 아닌 경우
+                ==  두 문자열이 동일한 경우
+                !=  두 문자열이 다른 경우
+                <   좌항 문자열이 우항 문자열보다 정렬시 선행되는 경우
+                >   우항 문자열이 좌항 문자열보다 정렬시 선행되는 경우
+            @Question
+                -d  이건 뭔가?
+                if [ ! -d ${JDK_DIR}/${JDK_VER}/bin]; then
+
+[banner]
+    터미널 창에 큰 글자를 출력하기 위한 프로그램
+    Mac에서는 오리엔테이션이 세로로 출력된다.
+
+    설치
+        sudo apt install sysvbanner
+    문자 출력
+        banner LinuxForDevices
+        banner Linux For Devices 

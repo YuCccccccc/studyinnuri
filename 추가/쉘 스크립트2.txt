@@ -1,0 +1,352 @@
+#!/bin/bash
+
+# 1. 스크립트 선언문 작성
+# 스크립트를 실행할 쉘을 지정해준다. 
+# echo $SHELL   : 현재 사용자의 기본 쉘프로그램을 확인한다.
+#!/bin/bash
+#!/bin/zsh
+
+# 2. 스크립트 파일에 대한 실행권한 부여
+# 스크립트 파일은 실행가능한 파일이어야 하며, 사용자가 스크립트 파일에 대한 실행권한을 가져야 한다.
+# -rw-r--r--  1 zino  staff     0B 12 10 10:50 final.sh     (실행불가)
+# > chmod 755 final.sh
+# -rwxr-xr-x  1 zino  staff     0B 12 10 10:50 final.sh     (실행가능)
+
+
+# # 3. 스크립트 실행하기
+# echo "Hello Zino!"
+# # 3-1) 현재 위치에서 상대경로로 실행
+# #       ./final.sh
+# # 3-2) 절대경로로 실행
+# #       /Users/zino/shell/final.sh
+# # 3-3) sh 명령어로 실행 (sh 명령어는 디폴트 쉘을 호출한다.)
+# #       sh final.sh
+# # 3-4) 설치된 쉘 명령으로 실행
+# #       bash final.sh
+# #       zsh final.sh 등..
+
+
+# # 4. 변수 선언
+# # 4-1) 앞뒤 공백이 없어야 한다.
+# # 4-2) 변수명은 대문자로, 위치는 최상단
+# # 4-3) 문자는 되도록 큰따옴표 사용
+# MEMBER="zino"
+# POSITION="TPLATDEV3"
+# AGE=34
+# HEIGHT=174.543
+# NICKNAME="자이노 zino 자인호 지노"
+# NUMBERS='1 2 3 4 5'
+# MEMBER=ZINO   되긴 하지만 비권장
+
+
+# # 5. 변수 치환
+# # 변수에 담긴 값을 사용하는 것.
+# # 사용법 : $변수명 or ${변수명}
+# MEMBER=ZINO
+# PHRASE=WORLD!
+# echo $MEMBER
+# echo ${MEMBER}
+# echo "$MEMBER"
+# echo '${MEMBER}'    # 작은 따옴표에서는 변수 치환 안됨
+# echo "${MEMBER}, ${PHRASE}"
+
+
+# # 6. 변수 선언 : 명령어 결과를 할당
+# # 사용법 : $(명령어) or `명령어`
+# B=$(ls -l)
+# echo "${B}"
+# A=`ls -l`
+# echo ${A}       # 개행처리 안해줌
+# echo "${A}"     # 개행처리 해줌
+
+# PROCESS=$(ps -elf)
+# ROOT=$(echo "$PROCESS" | grep root | head -1)
+# echo "$ROOT"
+# USER=$(echo "$PROCESS" | grep user | head -1)
+# echo "$USER"
+
+
+
+# # 7. 문자열 출력하기
+# echo : 줄바꿈 있음
+# echo "Hello, Zino!"
+# echo "Hello, Zino!"
+# printf : 줄바꿈 없음. 문자열 삽입
+# printf "Hello, Zino!"
+# printf "Hello, Zino!"
+# printf "%s, %s" Hello Zino!
+# printf "%s, %s, %s" "hello" "zino" "world!"
+# printf "%s, %s, %s" 'hello' 'zino' 'world!'
+
+
+
+# # 사칙연산
+# # 직접 연산
+# A=10
+# B=20
+# echo $(($A + $B))
+# echo $(($A - $B))
+# echo $(($A * $B))
+# echo $(($A / $B))
+# echo $(($A % $B))
+
+# # expr 로 연산
+# A=10
+# B=20
+# echo $(expr ${A} + ${B})
+# echo $(expr ${A} - ${B})
+# echo $(expr ${A} \* ${B})
+# echo $(expr ${A} / ${B})
+# echo $(expr ${A} % ${B})
+
+
+
+# # 8. 예약변수
+# # 운영체제?커널?에 미리 정의된 변수가 존재한다.
+# echo "${HOME} : 사용자의 홈 디렉토리"
+# echo "${PATH} : 실행파일의 경로(path로 등록된 경로들)"
+# echo "${LANG} : 프로그램 실행시 지원되는 언어"
+# echo "${UID} : 사용자의 UID"
+# echo "${SHELL} : 사용자가 로그인시 실행되는 쉘"
+# echo "${USER} : 사용자 계정 이름"
+# echo "${TERM} : 로그인 터미널"
+# echo "${FUNCNAME} : 현재 실행되고 있는 함수 이름"
+# function banner() {
+#     echo ${FUNCNAME}      # 함수이름인 banner 출력된다
+# }
+# banner
+
+
+# # 9. 배열
+# # 9-1) 1차원 배열만 지원
+# # 9-2) 원소 타입은 문자열, 정수열 모두 가능
+# arr=("hello" world 1 2 3 4 5)
+# # 9-3) 원소 접근
+# echo ${arr}     # 첫번째 원소 접근
+# echo ${arr[0]}  # 첫번째 원소 접근
+# echo ${arr[4]}
+# echo ${arr[@]}  # 모든 원소 접근
+# # 9-4) 배열 사이즈
+# echo ${#arr[@]}
+# # 9-5) 원소 삽입
+# arr[4]="three"
+# echo ${arr[4]}
+# # 9-6) 특정 원소 해제
+# unset arr[4]
+# echo ${arr[4]}
+
+
+# # 10. if문
+# # 10-1) 띄어쓰기와 형식을 엄격하게 맞춰야 동작함
+# # 10-2) 정수 비교 : -eq 사용
+# if [ 1 -eq 1 ]; then
+#     echo "1 -eq 1"
+# fi
+
+# # 10-3) 문자열 비교 : = 사용
+# if [ "zino" = "zino" ]; then
+#     echo "zino equals zino"
+# fi
+
+# # 10-4) 정수형 비교 연산
+# # -ne, -gt, -ge, -lt, -le 사용 가능
+
+# # 10-5) 반대 연산
+# if [ ! 1 -eq 2 ]; then
+#     echo "반대 연산은 ! 사용"
+# fi
+
+# # 10-6) 빈문자열은 false, 문자열은 true
+# if [ "" ]; then
+#     echo "이게 출력됐다면, 빈문자열은 true라는 말입니다."
+# else
+#     echo "이게 출력됐다면, 빈문자열은 false라는 말입니다."
+# fi 
+# if [ "a" ]; then 
+#     echo "이게 출력됐다면, 문자열은 true라는 말입니다."
+# else 
+#     echo "이게 출력됐다면, 문자열은 false라는 말입니다."
+# fi 
+# # 10-7) 논리연산 : AND OR 조건
+# if [ "" -o "a" ]; then 
+#     echo "-o는 OR 연산 입니다."
+# fi 
+# if [ "a" -a "b" ]; then 
+#     echo "-a는 AND 연산입니다."
+# fi 
+# if [ 1 -eq 2 -o 3 -eq 3 ]; then 
+#     echo "이런 식으로 중첩해서 사용할 수 있습니다."
+# fi 
+
+# # 10-7) elif
+# if [ 1 -eq 2 ]; then 
+#     echo "1 -eq 2"
+# elif [ 3 -eq 3 ]; then 
+#     echo "3 -eq 3"
+# fi
+
+# # 10-8) 명령어 결과로 비교
+# if [ $(ls | wc -l) -eq 5 ]; then
+#     echo "equals"
+# else
+#     echo "not equals"
+# fi
+
+
+# # 11. 함수
+# # 11-1) 함수 선언
+# function method1() {
+#     echo "함수 method1 입니다."
+# }
+# method2()
+# {
+#     echo "함수 method2 입니다."
+# }
+# # 11-2) 함수 호출
+# method1
+# method2
+
+# # 11-3) 매개변수
+# method3()
+# {
+#     echo ${1}, ${2} # 매개변수 사용
+#     echo "스크립트 파일명: ${0}"
+#     echo "매개변수 개수: ${#}"
+#     echo "전체 매개변수 값 : ${*}"
+#     echo "전체 매개변수 값2 : ${@}"
+#     echo "매개변수 1 : ${1}"
+#     echo "매개변수 2 : ${2}"
+#     echo "매개변수 3 : ${3}"
+# }
+# method3 one two three  # 매개변수 전달
+
+# # 11-4) 함수 내부에서 외부 변수 변경 가능
+# VAL=""
+# mmethod1()
+# {
+#     VAL="test"
+# }
+# method1
+# echo ${VAL}     # test 출력
+
+# # 11-5) 변수의 스코프
+# # 내부 함수에서 선언된 변수는 공유되지 않음
+# method2(){
+#     val="test"
+#     echo ${val}
+# }
+# RET_VAL=$(method2)
+# echo ${val}     # 공백으로 출력
+# echo ${RET_VAL} # 명령어 실행 결과 출력
+
+
+
+# # 12. Case 문
+# A="MacOS"
+# case ${A} in
+#     "linux") echo "리눅스" ;;
+#     "unix") echo "유닉스" ;;
+#     "windows") echo "윈도우즈" ;;
+#     "MacOS") echo "맥OS" ;;
+#     *) echo "모르겠어요" ;;
+# esac 
+
+
+# # 13. 반복문
+# # for 변수 in 리스트,범위,배열 등
+# # do
+# #     실행문
+# # done
+
+# # 13-1)
+# for var in A B C D E 
+# do 
+#     echo ${var}
+# done
+
+# # 13-2)
+# LIST="A B C D E F G"
+# for var in ${LIST}
+# do 
+#     echo ${var}
+# done
+
+# # 13-3)
+# ARRAY=(1 3 5 7 9)
+# for var in "${ARRAY[@]}"
+# do
+#     echo "${var}"
+# done
+
+# # 13-4)
+# for var in {1..10}
+# do
+#     echo ${var}
+# done
+
+# # 13-5)
+# for ((var=0; var<5; var++));
+# do
+#     echo "${var}"
+# done
+
+# # 13-6) 무한루프
+# for ((;;));
+# do 
+#     echo "Hello"
+# done
+
+
+# # 14. 파일 관련 연산
+# # 참고 https://rhrhth23.tistory.com/42
+# # -d : 디렉토리가 존재하면 참
+# # -e : 파일이 존재하면 참
+# # -L : 파일이 심볼릭 링크이면 참
+# # -s : 파일크기가 0보다 크면 참
+# # -S : 파일 타입이 소켓이면 참
+# # -r : 파일을 읽을 수 있으면 참
+# # -w : 파일을 쓸 수 있으면 참
+# # -x : 파일을 실행할 수 있으면 참
+# # -f : 파일이 정규파일이면 참
+# # -c : 파일이 문자 장치이면 참
+# # 값1 -nt 값2 : 값1파일이 값2파일보다 최신파일이면 참
+# # 값1 -ot 값2 : 값1파일이 값2파일보다 최신이 아니면 참
+# # 값1 -ef 값2 : 값1파일이 값2파일과 동일하면 참
+
+# if [ -d ${HOME} ]; then
+#     echo "HOME 변수는 존재하는 디렉토리 경로이다."
+# fi
+# if [ ! -d ${USER} ];  then
+#     echo "USER 변수는 존재하는 디렉토리 경로가 아니다."
+# fi
+# CURRENT_FILE_PATH=$(pwd)/${0}
+# if [ -e ${CURRENT_FILE_PATH} ]; then 
+#     echo "존재하는 파일입니다."
+# fi
+# TEMP_SYMBOLIC_LINK=/Users/zino/shell/s_link_to_script2
+# if [ -L ${TEMP_SYMBOLIC_LINK} ]; then 
+#     echo "이 파일은 심볼릭 링크입니다."
+# fi
+
+
+
+# # 15. 변수 export
+# # == temp_variable_script.sh 내용 ==
+# # echo {ZINO_VAR}
+# export ZINO_VAR="HyunJinHo"
+# ./temp_variable_script.sh   # 외부 스크립트로 변수가 전달된다.
+
+
+# # 16. EXIT_STATUS
+# # 쉘에서 함수는 return 반환값이 없고, EXIT_STATUS로 전달된다.
+# # 0은 성공을 의미, 1~255는 에러를 의미한다.
+# # 16-1) exit : 프로그램 종료
+# exit 0
+# echo "hello"    # 실행되지 않음
+# # 16-2) $? : 가장 최근에 실행한 명령어의 종료코드
+# err()
+# {
+#     ./exit_16.sh
+#     echo "오류코드: ${?}"
+# }
+# err

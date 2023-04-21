@@ -1,0 +1,19 @@
+
+기존의 도커에서는 docker Engine이라는 패키지에 API, CLI, 네트워크, 스토리지등의 기능들을 
+한번에 담아 두었는데 docker에 의존성이 높은 쿠버네티스(컨테이너를 활용해서 만들었기때문에)에서 도커가 새로운 버전이 나올때 마다
+영향을 크게 받았다.
+그래서 docker를 중심으로 구글등의 컨테이너에 관심이 있는 집단들이 모여서 Open Container Initiative(OCI)라는 프로젝트를 진행한다.
+여기서 컨테이너에 관한 표준을 정하는 일을 시작하고 Docker에서는 OCI표준을 준수하는 containerd라는 
+container Runtime을 만들고, 쿠버네티스에서 OCI표준을 준수하는 이미지들을 실행할수있는 container Runtime Interface(CRI) 스펙을 
+1.5버전부터 제공하여 docker 버전에 관계없이 OCI표준을 준수하면 쿠버네티스에서 실행가능하게 환경이 만들어지게 되었다.
+
+컨테이너를 빌드하고 실행, 네트워크, 스토리지 등을 제공하는 도커엔진이라는 패키지의 활용이 불편해서 
+여러사람이 모여 OCI라는 Container Runtime표준을 정의했고 docker에서 만든것이 containerd이다. 
+containerd 는 container + daemon 이다. 
+
+RedHaat, Intel, SUSE, IBM에서 OCI표준에 따라 쿠버네티스 전용 container Runtime을 만들었는데 
+이것을 CRI-O이고 containerd와 CRI-O가 가장 많이 쓰이는 container Runtimedlek. 
+containerd는 docker engine에 기본으로 탑재 되어 있어 docker를 사용한다면 내부적으로는 containerd를 사용한다. 
+docker build로 생성되는 이미지들 역시 OCI 스펙을 준수하고 있다.
+
+쿠버네티스 1.23 이후는 container Runtime으로 docker의 지원이 중단 되었다.

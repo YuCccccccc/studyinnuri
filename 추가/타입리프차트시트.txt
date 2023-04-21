@@ -1,0 +1,270 @@
+
+ 간단한 표현
+    변수 표현식: ${...}
+    선택 변수 표현식: *{...}
+    메시지 표현식: #{...}
+    링크 URL 표현식: @{...}
+    조각 표현식: ~{...}
+리터럴
+    텍스트: 'one text', 'Another one!',...
+    숫자: 0, 34, 3.0, 12.3,...
+    불린: true, false
+    널: null
+    리터럴 토큰: one, sometext, main,...
+문자 연산
+    문자합치기:+
+    리터럴 대체: |The name is ${name}|
+산술 연산
+    Binary operators: +, -, *, /, %
+    Minus sign (unary operator): -
+불린 연산
+    Binary operators: and, or
+    Boolean negation (unary operator): !, not
+비교와 동등
+    비교:>,<,>=,<=(gt,lt,ge,le)
+    동등 연산: ==, != (eq, ne)
+조건 연산
+    If-then: (if) ? (then)
+    If-then-else: (if) ? (then) : (else)
+    Default: (value) ?: (defaultvalue)
+특별한 토큰
+    No-Operation: _
+------------------------------------------------------------------------------
+
+텍스트 출력 (escaped)
+    <span th:text="${data}">        
+    [[${data}]]                   // 컨텐츠 안에서 직접 텍스트 출력 (escaped)  
+
+텍스트 출력 (unescaped)
+    <span th:utext="${data}">       
+    [(${data})]                   // 컨텐츠 안에서 직접 텍스트 출력 (unescaped)
+
+타임리프 해석 중지
+    <span th:inline="none">[[...]] = </span>    // span 영역은 타임리프 해석 안함.
+
+변수 표현식
+    Object
+        <span th:text="${user.username}"></span>
+        <span th:text="${user['username']}"></span>
+        <span th:text="${user.getUsername()}"></span>
+    List
+        <span th:text="${users[0].username}"></span>
+        <span th:text="${users[0]['username']}"></span>
+        <span th:text="${users[0].getUsername()}"></span>
+    Map
+        <span th:text="${userMap['userA'].username}"></span>
+        <span th:text="${userMap['userA']['username']}"></span>
+        <span th:text="${userMap['userA'].getUsername()}"></span>
+
+지역 변수
+    <div th:with="first=${users[0]}">
+        <p>처음 사람의 이름은 <span th:text="${first.username}"></span></p> 
+    </div>
+
+Locale
+    <span th:text="${#locale}"></span>
+
+스프링빈
+    <span th:text="${@helloBean.hello('Spring!')}"></span>
+    <span th:text="${@스프링빈이름.메소드명('Spring!')}"></span>
+
+숫자/문자/날짜 관련
+    https://www.thymeleaf.org/doc/tutorials/3.0/usingthymeleaf.html#appendix-b-expression-utility-objects
+
+타임리프 자바8 날짜 지원 라이브러리 : thymeleaf-extras-java8time (스프링부트 타임리프에 기본 포함되어 있음)
+    <span th:text="${#temporals.format(localDateTime, 'yyyy-MM-dd HH:mm:ss')}"></span>
+
+URL 처리 (경로변수 + 쿼리파라미터)
+    <a th:href="@{/hello}">basic url</a>                                                                        // /hello
+    <a th:href="@{/hello(param1=${param1}, param2=${param2})}">hello query param</a>                            // /hello?param1=data1&param2=data2
+    <a th:href="@{/hello/{param1}/{param2}(param1=${param1}, param2=${param2})}">path variable</a>              // /hello/data1/data2
+    <a th:href="@{/hello/{param1}(param1=${param1}, param2=${param2})}">path variable + query parameter</a>     // /hello/data1?param2=data2
+
+문자 리터럴
+    <li>'hello' + ' world!' = <span th:text="'hello' + ' world!'"></span></li> 
+    <li>'hello world!' = <span th:text="'hello world!'"></span></li>
+    <li>'hello ' + ${data} = <span th:text="'hello ' + ${data}"></span></li> 
+    <li>리터럴 대체 |hello ${data}| = <span th:text="|hello ${data}|"></span></li>
+    
+    <!--주의! 다음 주석을 풀면 예외가 발생함. 띄어쓰기가 있는 문자열은 작은따옴표로 감싸야 한다. -->
+    <!--    <li>"hello world!" = <span th:text="hello world!"></span></li>-->
+
+연산자
+    <span th:text="10 % 2 == 0">
+    <span th:text="1 &gt; 10"></span>
+    <span th:text="1 gt 10"></span>
+    <span th:text="1 >= 10"></span>
+    <span th:text="1 ge 10"></span>
+    <span th:text="1 == 10"></span>
+    
+    조건식
+        <span th:text="(10 % 2 == 0)? '짝수':'홀수'"></span>
+
+    엘비스 연산자
+        <span th:text="${data}?: '데이터가 없습니다.'"></span>
+        <span th:text="${nullData}?: '데이터가 없습니다.'"></span>
+    No 연산자
+        <span th:text="${data}?: _">데이터가 없습니다.</span>
+        <span th:text="${nullData}?: _">데이터가 없습니다.</span>
+
+속성값 설정
+    <input type="text" name="mock" th:name="userA" />
+
+    속성값 추가
+        <input type="text" class="text" th:attrappend="class=' large'" />
+        <input type="text" class="text" th:attrprepend="class='large '" />
+        <input type="text" class="text" th:classappend="large" />
+    
+    checked 처리
+        - checked o <input type="checkbox" name="active" th:checked="true" /><br/>
+        - checked x <input type="checkbox" name="active" th:checked="false" /><br/> 
+        - checked=false <input type="checkbox" name="active" checked="false" /><br/>
+
+반복
+    반복 기본
+        <tr th:each="user : ${users}">
+            <td th:text="${user.username}">username</td>
+            <td th:text="${user.age}">0</td>
+        </tr>
+    반복 상태
+        <tr th:each="user, userStat : ${users}">
+            <td th:text="${userStat.count}">username</td>
+            <td th:text="${user.username}">username</td>
+            <td th:text="${user.age}">0</td>
+            <td>
+                index = <span th:text="${userStat.index}"></span>
+                count = <span th:text="${userStat.count}"></span>
+                size = <span th:text="${userStat.size}"></span>
+                even? = <span th:text="${userStat.even}"></span>
+                odd? = <span th:text="${userStat.odd}"></span>
+                first? = <span th:text="${userStat.first}"></span>
+                last? = <span th:text="${userStat.last}"></span>
+                current = <span th:text="${userStat.current}"></span>
+            </td>
+        </tr>
+
+조건부 평가
+    if문
+        <span th:text="'미성년자'" th:if="${user.age lt 20}"></span> 
+        <span th:text="'미성년자'" th:unless="${user.age ge 20}"></span>
+    switch 문
+        <td th:switch="${user.age}">
+            <span th:case="10">10살</span> 
+            <span th:case="20">20살</span> 
+            <span th:case="*">기타</span>
+        </td> 
+
+주석
+    타임리프 파서 주석 (주로 씀)
+        <!--/* [[${data}]] */-->
+        <!--/*-->   주석 본문 <!--*/-->
+    타임리프 프로토타입 주석
+        <!--/*/
+            <span th:text="${data}">html data</span> 
+        /*/-->
+블록
+    <th:block th:each="user : ${users}">
+        <div>
+            사용자 이름1 <span th:text="${user.username}"></span>
+            사용자 나이1 <span th:text="${user.age}"></span>
+        </div>
+        <div>
+            요약 <span th:text="${user.username} + ' / ' + ${user.age}"></span>
+        </div>
+    </th:block>
+
+자바스크립트 인라인
+    사용전
+        <script>
+            var username = userA;   // 문자열인데 자바스크립트 변수로 인식됨
+            var age = 10;
+
+            //자바스크립트 내추럴 템플릿
+            var username2 = /*userA*/ "test username";      // 자바스크립트 주석처리되어 test username값이 담긴다.
+
+            //객체
+            var user = BasicController.User(username=userA, age=10);    // 객체.toString 결과가 표시된다.
+        </script>
+    사용후
+        <script th:inline="javascript">
+            var username = "userA";     // 문자열 변수는 큰 따옴표로 처리해준다.
+            var age = 10;
+
+            //자바스크립트 내추럴 템플릿 
+            var username2 = "userA";    // 자바스크립트 내추럴 템플릿이 동작하여 test username 대신 userA 값이 할당된다.
+
+            //객체
+            var user = {"username":"userA","age":10};   // 객체를 JSON으로 변환해준다.
+        </script>
+
+    자바스크립트 인라인 each
+        <script th:inline="javascript">
+            [# th:each="user, stat : ${users}"]
+                var user[[${stat.count}]] = [[${user}]];
+            [/]
+        </script>
+    
+    템플릿 조각
+        템플릿 조각 준비
+            <footer th:fragment="copy"> 푸터 자리 입니다.</footer>
+            <footer th:fragment="copyParam (param1, param2)">
+                <p>파라미터 자리 입니다.</p>
+                <p th:text="${param1}"></p> <p th:text="${param2}"></p>
+            </footer>
+
+        템플릿 조각 호출
+            부분 포함 insert
+                <div th:insert="~{template/fragment/footer :: copy}"></div>
+            부분 포함 replace
+                <div th:replace="~{template/fragment/footer :: copy}"></div>
+            부분 포함 단순 표현식
+                <div th:replace="template/fragment/footer :: copy"></div>
+            파라미터 사용
+                <div th:replace="~{template/fragment/footer :: copyParam ('데이터1', '데이터 2')}"></div>
+        
+    템플릿 레이아웃
+        기본 레이아웃
+            <head th:fragment="common_header(title,links)">
+                <title th:replace="${title}">레이아웃 타이틀</title>
+                <!-- 공통 -->
+                <link rel="stylesheet" type="text/css" media="all" th:href="@{/css/awesomeapp.css}">
+                <link rel="shortcut icon" th:href="@{/images/favicon.ico}">
+                <script type="text/javascript" th:src="@{/sh/scripts/codebase.js}"></script>
+                <!-- 추가 -->
+                <th:block th:replace="${links}" />
+            </head>
+        
+        기본 레이아웃 호출
+            <head th:replace="template/layout/base :: common_header(~{::title},~{::link})">     // 호출한다.
+                <title>메인 타이틀</title>      // 기본 레이아웃의 title 영역을 대체한다.
+                <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">     // 기본 레이아웃의 link 영역을 대체한다.
+                <link rel="stylesheet" th:href="@{/themes/smoothness/jquery-ui.css}">   // 기본 레이아웃의 link 영역을 대체한다.
+            </head>
+    
+    확장된 템플릿 레이아웃
+        기본 레이아웃 파일 준비 <layoutFile.html> =================================================
+            <html th:fragment="layout (title, content)" xmlns:th="http://www.thymeleaf.org">
+                <head>
+                    <title th:replace="${title}">레이아웃 타이틀</title>
+                </head>
+                <body>
+                    <h1>레이아웃 H1</h1>
+                    <div th:replace="${content}">
+                        <p>레이아웃 컨텐츠</p>
+                    </div>
+                    <footer> 레이아웃 푸터 </footer>
+                </body>
+            </html>
+        
+        기본 레이아웃 파일 호출
+            <html th:replace="~{template/layoutExtend/layoutFile :: layout(~{::title}, ~{::section})}" xmlns:th="http://www.thymeleaf.org">
+                <head>
+                    <title>메인 페이지 타이틀</title> 
+                </head>
+                <body>
+                    <section>
+                        <p>메인 페이지 컨텐츠</p>
+                        <div>메인 페이지 포함 내용</div> 
+                    </section>
+                </body>
+            </html>
