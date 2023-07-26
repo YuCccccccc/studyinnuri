@@ -1,0 +1,2 @@
+깃훅 관련 설정 ex ) push 진행시 젠킨스 빌드.
+https://www.lesstif.com/gitbook/gitlab-web-hook-22642955.html

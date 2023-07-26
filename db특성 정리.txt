@@ -1,0 +1,13 @@
+
+
+                      mysql                               oracle                                  mssql
+현재시간                now()                                sysdate                              getDate()         
+날짜포맷     date_format(now(),'%Y%m%d%h%i%s')       to_char(sysdate,'')                     convert(getDate(), 날짜스타일번호)
+like절           like concat(문자, '%')              like '%'||문자||'%'
+형변화            cast(문자 as char)                  to_char(문자), to_number(문자)            convert(varchar,number) 
+대소문자구분          함,설정으로 변경가능                        안함
+문자열자르기        substring(문자열,1,10)              substring(문자열,1,10)                       substring(문자열,1,10) 
+문자열합치기          concat(문자열,문자열)                   문자열||문자열
+null일때 변환    ifnull(컬럼명,변환할값)                   nvl(컬럼명, 변환할값)                       isnull(컬럼명, 변환할값)
+자르기                                                  trunc(문자, 자릿수)                         round(문자, 자릿수)
+table lock방지                                                                               join table t1 with (nolock) 

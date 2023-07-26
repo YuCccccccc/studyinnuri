@@ -1,0 +1,26 @@
+오류
+        * branch            main       -> FETCH_HEAD
+        hint: You have divergent branches and need to specify how to reconcile them.
+        hint: You can do so by running one of the following commands sometime before
+        hint: your next pull:
+        hint: 
+        hint:   git config pull.rebase false  # merge
+        hint:   git config pull.rebase true   # rebase
+        hint:   git config pull.ff only       # fast-forward only
+        hint: 
+        hint: You can replace "git config" with "git config --global" to set a default
+        hint: preference for all repositories. You can also pass --rebase, --no-rebase,
+        hint: or --ff-only on the command line to override the configured default per
+        hint: invocation.
+        fatal: Need to specify how to reconcile divergent branches.
+
+    해결방안
+        터미널에 
+            git config --global pull.rebase true  
+        로 rebase true로 설정
+
+        default (merge) : 로컬 브랜치와 리모트 브랜치의 Head가 다른 위치에 있을 때, pull 받으면, Merge 커밋을 생성함.
+        rebase : 로컬 브랜치와 리모트 브랜치의 Head가 다른 위치에 있을 때, pull 받으면, 리모트 브랜치를 rebase 하여 history를 정리함.
+        fast-forward only : fast-forward 관계에 있을 때만 pull 을 허용함.
+
+        https://younho9.dev/git-config

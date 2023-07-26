@@ -1,0 +1,8 @@
+더하기
+    pricePolicy.applyPrice.add(20)
+곱하기
+     pricePolicy.applyPrice.multiply(1.1),
+빼기
+    pricePolicy.applyPrice.subtract(pricePolicy.applyPrice.divide(1.1))
+나누기
+     pricePolicy.applyPrice.divide(1.1),

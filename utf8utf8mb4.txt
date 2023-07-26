@@ -1,0 +1,20 @@
+
+
+utf8과 utf8mb4의 차이
+
+MySQL, MariaDB 데이터베이스 설정 세팅시 (다른 데이터베이스는 상관없음 utf8이 4바이트로 구성됨.)
+"mattermost:ooooo@tcp(121.126.171.000:3306)/mattermost?charset=utf8\u0026readTimeout=30s\u0026writeTimeout=30s",
+이런식으로 많이 세팅을 하는데 여기서 charset에서 utf8 또는 utf8mb4 이 들어가는경우가 있다.
+이둘의 차이점은 utf8 는 가변3바이트를 사용하는데 반해서, utf8mb4는 내부적으로 한문자를 표현하는데 4바이트를 사용하는 차이가 있다.
+한문자를 4바이트로 사용해야하는 경우는 이모지를 사용할때 4바이트를 사용하므로 채팅관련 데이터베이스일 경우  utf8mb4로 설정하는것이 좋다.
+
+InnoDB 엔진의 경우 인덱스 할 수있는 최대 크기는 767 bytes 이다. 
+인덱스가 VARCHAR(255)인 필드가 있었다면 이 필드는 utf8mb4로 변경이 불가능하고 
+VAR(191)로 길이를 줄여줘야 인덱스를 유지한 상태로 utf8mb4로 변경이 가능
+
+VARCHAR(255)이 차지하는 최대 bytes 수
+    utf8인 경우 255 x 3 = 765 bytes (인덱스 가능)
+    utf8mb4인 경우 255 x 4 = 1020 bytes (인덱스 불가능!)
+VARCHAR(191)
+    utf8mb4인 경우 191 x 4 = 764 bytes (인덱스 가능)
+    

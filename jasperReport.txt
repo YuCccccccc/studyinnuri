@@ -1,0 +1,59 @@
+JasperReport 는 Web Service 또는 C/S 형태로 보고서를 내보낼 수 있는 Java 기반의 개방형 툴이며 기존 기업용 툴에 필적하는 기능을 제공
+JasperReport와 iReport는 일반적으로 함께 사용
+JasperReport 와 iReport를 이용하여 보고서를 개발할 때 먼저 iReport에서 보고서 레이아웃을 디자인하고 “*.jrxml” XML 형식 파일을 만들고 “*.jasper”라는 확장 파일로 컴파일
+JasperReport에서 “*.jasper” 파일을 읽고 데이터 소스를 연결하고 데이터를 채우고 마지막으로 JasperPrint에서 보고서를 내보낸다.
+
+JasperReport 와 iReport에서 보고서를 작성하려면 다음 세 가지 다운로드 패키지가 필요합니다.
+
+JasperReports® Library
+iReport Designer
+JDK1.7
+
+excel 
+https://trandent.com/article/ireport/detail/237
+
+https://javahowtos.com/guides/113-data-import-export/377-create-and-download-jasper-report-xlsx-via-rest-service-in-spring-boot.html
+
+//getInputStream() 메소드는 전송하는 데이터를 읽기위한 스트림객체를 HttpServletResponse으로부터 생성하는 것이다. getOutputStream() 메소드는 전송할 데이터를 출력하기위한 스트림객체를 HttpServletResponse으로부터 생성하는 것
+
+  @GetMapping(value = "/users/jrxml")
+    public void searchUserJrxml(UserSearchCondition condition, HttpServletResponse response) {
+
+        try
+        {   List<UserDto> userDtoList =  userQueryRepository.findUser(condition);   //엑셀에 넣을 데이터를 받아온다.
+            JRDataSource datasource = new JRBeanCollectionDataSource(userDtoList);  //데이터를 jasperReport의 datasource형식으로 바꿔준다.
+            JasperReport compileReport = JasperCompileManager.compileReport(new FileInputStream("src/main/resources/excel/sys011.jrxml"));  //파일의 형식이 담긴 jasperReport 파일을 읽어온다.
+            JasperPrint  report = JasperFillManager.fillReport(compileReport, null, datasource);    // 파일 형식과 데이터를 이용하여 리포트를 만들어준다.
+
+            JRXlsExporter xlsExporter = new JRXlsExporter();           //엑셀 형식으로 파일을 빼내기 위해서 xls 형식을 사용하는 exporter를 쓴다. XLSX를 사용하려면 JRXlsxExporter를 사용하고 pdf도 동일 pdf는 한글 지원이 안되므로 한글 언어폰트를 추가해주어야한다.
+            xlsExporter.setExporterInput(new SimpleExporterInput(report));  //위에서 만든 리포트를 input해준다.
+            xlsExporter.setExporterOutput(new SimpleOutputStreamExporterOutput(response.getOutputStream()));    //output 위치를 지정해준다. response.getOutputStream() 대신 경로를 써주면 경로에 파일 생성.
+            SimpleXlsReportConfiguration xlsReportConfiguration = new SimpleXlsReportConfiguration();   //엑셀파일 설정을 위함.
+            xlsReportConfiguration.setOnePagePerSheet(true);
+            xlsReportConfiguration.setRemoveEmptySpaceBetweenRows(false);
+            xlsReportConfiguration.setDetectCellType(true);
+            xlsReportConfiguration.setWhitePageBackground(false);
+            xlsExporter.setConfiguration(xlsReportConfiguration);   // 엑셀 설정을 xlsExporter에 넣어준다.
+            response.setHeader("Content-Disposition", "attachment;filename=sys011.xls");    // 파일 네임을 지정해준다.
+            response.setContentType("application/octet-stream");    //8비트 데이터 형식
+            xlsExporter.exportReport(); // 엑셀 파일 생성.
+        }
+        catch (Exception e)
+        {
+            log.error("\n exception jasperSample =================> \n\n" + e.getMessage());
+        }
+
+
+    }
+<font pdfFontName="fonts/nanum.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+
+
+    parameter로 헤더 정보를 넘겨주어서 헤더를 글로벌로 한다.
+    pdf 파일로 만들어서 진행한다. 
+    
+
+    pdf ㅇ예제 https://m.blog.naver.com/PostView.naver?isHttpsRedirect=true&blogId=s0215hc&logNo=220555532816
+
+
+
+    

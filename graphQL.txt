@@ -1,0 +1,92 @@
+https://www.yalco.kr/@graphql-apollo/1-1/
+
+GraphQL은 API를 위한 쿼리 언어이며 이미 존재하는 데이터로 쿼리를 수행하기 위한 런타임 
+웹 클라이언트가 데이터를 서버로 부터 효율적으로 가져오는 것이 목적, sql은 데이터베이스 시스템에 저장된 데이터를 효율적으로 가져오는 것이 목적
+
+ restAPI 를 보완하기위해 나온 방식. 
+ GraphQL은 명세, 형식일뿐.
+필요한 정보들만 선택하여 받아올수 있다.
+    Overfetching 문제 해결. - 필요한 정보를 얻기위해 불필요한 정보까지 얻는 번거로움.
+    데이터 전송량 감소.
+여러 계층의 정보들을 한번에 받아올수 있다. 
+    요청횟수가 감소한다. 
+하나의 endpoint에서 모든 요청을 처리한다. 
+    - 하나의 URL에서 POST로 모든 요청이 가능.
+
+
+
+쿼리는 데이터를 읽는데(R) 사용하고, 뮤테이션은 데이터를 변조(CUD) 하는데 사용한다는 개념 적인 규약
+query: 데이터를 받아올 때 사용한다.
+mutation: 데이터를 생성, 수정, 삭제할 때 사용한다.
+subscription: 웹소켓을 사용해 실시간 양방향 통신을 구현할 때 사용한다.
+
+query{ -- RESTAPI 에서 GET과 같은 동작을 함.
+    teams { -- 테이블명s  테이블의 여러 데이터를 가지고 오므로.
+        id  --받아올 컬럼.
+        manager
+        office
+        extension_number
+        mascot
+        cleaning_duty
+        project
+    }
+}
+
+
+query {
+  team(id: 1) { -- 팀테이블에서 id가 1인 데이터를 가지고 온다.
+    manager
+    office
+  }
+}
+
+
+mutation {--- 정보를 추가,수정,삭제할때 사용한다. 
+  postTeam (input: {---  postTeam -- Team테이블에 데이터 추가.
+    manager: "John Smith"
+    office: "104B"
+    extension_number: "#9982"
+    mascot: "Dragon"
+    cleaning_duty: "Monday"
+    project: "Lordaeron"
+  }) {
+    manager
+    office
+    extension_number
+    mascot
+    cleaning_duty
+    project
+  }
+}
+
+
+mutation { --- 정보를 추가,수정,삭제할때 사용한다. 
+    editTeam(id: 2, input: { ---  editTeam -- Team테이블에 데이터 수정.
+        manager: "Maruchi Han"
+        office: "105A"
+        extension_number: "2315"
+        mascot: "Direwolf"
+        cleaning_duty: "Wednesday"
+        project: "Haemosu"
+    }) {
+        id,
+        manager,
+        office,
+        extension_number,
+        mascot,
+        cleaning_duty,
+        project
+    }
+}
+
+mutation {--- 정보를 추가,수정,삭제할때 사용한다. 
+    deleteTeam(id: 3) {---  deleteTeam -- Team테이블에 데이터 삭제.
+        id,
+        manager,
+        office,
+        extension_number,
+        mascot,
+        cleaning_duty,
+        project
+    }
+}

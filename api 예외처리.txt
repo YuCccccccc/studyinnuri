@@ -1,0 +1,9 @@
+api 예외처리 이유 - 각 api의 오류 상황에 맞게 스펙을 정해서 json으로 데이터를 내려주기 위함.
+스프링 부트가 제공하는 기본 에러처리
+	errorHtml() - 클라이언트 요청의 Accept 헤더값이 text/html인 경우에 errorHtml()을 호출하여 view를 제공
+	error() - errorHtml()이외의 경우에 호출되고 responseEntityFH HTTPBody에 JSON데이터를 반환
+
+HandlerExceptionResolver를 활용 - 컨트롤러 밖으로 던져진 예외를 해결하고 동작방식을 변경할때 사용
+
+
+ExceptionHandler
