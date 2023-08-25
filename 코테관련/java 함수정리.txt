@@ -1,1 +1,10 @@
+HashMap<String, Integer> hm = new HashMap<>(); //해쉬맵을 이용하여 순서대로 값을 넣어줄 예정
+hm.put(player, hm.getOrDefault(player, 0) + 1); // put(key값, 값);
+//key : 값을 가져와야 하는 요소의 키입니다. defaultValue : 지정된 키로 매핑된 값이 없는 경우 반환되어야 하는 기본값입니다.
+//반환 값 : 찾는 key가 존재하면 해당 key에 매핑되어 있는 값을 반환하고, 그렇지 않으면 디폴트 값이 반환됩니다.
 
+for (String key : hm.keySet()) {  // 해쉬맵에서 키값의 묶음을 순서대로 key 에 넣어준다. 
+if (hm.get(key) != 0){ // keySet() : 각 키 호출에 대해 map.get(key) 값을 가지고온다.
+    answer = key;
+            }
+        }
